@@ -19,6 +19,10 @@ class FactorioAPI {
     })
   }
 
+  /**
+   * @param {String} username
+   * @param {String} password
+   */
   authenticateAPI(username, password) {
     const apiAuthOptions = {
       method: 'POST',
