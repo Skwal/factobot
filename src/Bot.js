@@ -39,7 +39,7 @@ class Bot {
   bindEvents() {
     this.controller.on('rtm_close', (bot, err) => {
       if (err) {
-        throw new Error('RTM Close failed unexpectedly!')
+        console.error('RTM Close failed unexpectedly!')
       }
       this.start()
     });
@@ -59,6 +59,45 @@ class Bot {
     }
   }
 
+  getTimeString(time) {
+    const hours = Math.floor(time / 60)
+    const minutes = time % 60
+
+    return hours + 'h ' + minutes + 'm'
+  }
+
+  /**
+   * @param {String} title
+   * @param {String} value
+   * @param {Boolean} short
+   */
+  getServerStatusField(title, value, short) {
+    return {
+      title: title,
+      value: value,
+      short: short
+    }
+  }
+
+  getServerStatusMessage(server) {
+    const time_elapsed = this.getTimeString(server.game_time_elapsed)
+    const players = server.players && server.players.length ? server.players.join(', ') : 'None'
+
+    return [
+      {
+        title: 'Game Details',
+        color: '#7CD197',
+        fields: [
+          this.getServerStatusField("Name", server.name, true),
+          this.getServerStatusField("Version", server.application_version.game_version, true),
+          this.getServerStatusField("Time Elapsed", time_elapsed, true),
+          this.getServerStatusField("Description", server.description, false),
+          this.getServerStatusField("Players Online", players, false)
+        ],
+      }
+    ]
+  }
+
   replyWithSeverStatus(message, server) {
     if (!server || !server.game_id) {
       this.bot.reply(message, "Couldn't find the game. Did the id change? Let's see if I find a new one...")
@@ -67,47 +106,9 @@ class Bot {
       return
     }
 
-    const hours = Math.floor(server.game_time_elapsed / 60)
-    const minutes = server.game_time_elapsed % 60
-
-    const time_elapsed = hours + 'h ' + minutes + 'm'
-    const players = server.players
-
     this.bot.reply(message, {
       text: "Here it is:",
-      attachments: [
-        {
-          title: 'Game Details',
-          color: '#7CD197',
-          fields: [
-            {
-              title: "Name",
-              value: server.name,
-              short: true
-            },
-            {
-              title: "Version",
-              value: server.application_version.game_version,
-              short: true
-            },
-            {
-              title: "Time Elapsed",
-              value: time_elapsed,
-              short: true
-            },
-            {
-              title: "Description",
-              value: server.description,
-              short: false
-            },
-            {
-              title: "Players Online",
-              value: players && players.length ? players.join(', ') : 'None',
-              short: false
-            }
-          ],
-        }
-      ]
+      attachments: this.getServerStatusMessage(server)
     })
   }
 }
