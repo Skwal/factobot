@@ -59,6 +59,52 @@ class Bot {
     }
   }
 
+  getTimeString(time) {
+    const hours = Math.floor(time / 60)
+    const minutes = time % 60
+
+    return hours + 'h ' + minutes + 'm'
+  }
+
+  getServerStatusMessage(server) {
+    const time_elapsed = this.getTimeString(server.game_time_elapsed)
+    const players = server.players
+
+    return [
+      {
+        title: 'Game Details',
+        color: '#7CD197',
+        fields: [
+          {
+            title: "Name",
+            value: server.name,
+            short: true
+          },
+          {
+            title: "Version",
+            value: server.application_version.game_version,
+            short: true
+          },
+          {
+            title: "Time Elapsed",
+            value: time_elapsed,
+            short: true
+          },
+          {
+            title: "Description",
+            value: server.description,
+            short: false
+          },
+          {
+            title: "Players Online",
+            value: players && players.length ? players.join(', ') : 'None',
+            short: false
+          }
+        ],
+      }
+    ]
+  }
+
   replyWithSeverStatus(message, server) {
     if (!server || !server.game_id) {
       this.bot.reply(message, "Couldn't find the game. Did the id change? Let's see if I find a new one...")
@@ -67,47 +113,9 @@ class Bot {
       return
     }
 
-    const hours = Math.floor(server.game_time_elapsed / 60)
-    const minutes = server.game_time_elapsed % 60
-
-    const time_elapsed = hours + 'h ' + minutes + 'm'
-    const players = server.players
-
     this.bot.reply(message, {
       text: "Here it is:",
-      attachments: [
-        {
-          title: 'Game Details',
-          color: '#7CD197',
-          fields: [
-            {
-              title: "Name",
-              value: server.name,
-              short: true
-            },
-            {
-              title: "Version",
-              value: server.application_version.game_version,
-              short: true
-            },
-            {
-              title: "Time Elapsed",
-              value: time_elapsed,
-              short: true
-            },
-            {
-              title: "Description",
-              value: server.description,
-              short: false
-            },
-            {
-              title: "Players Online",
-              value: players && players.length ? players.join(', ') : 'None',
-              short: false
-            }
-          ],
-        }
-      ]
+      attachments: this.getServerStatusMessage(server)
     })
   }
 }
