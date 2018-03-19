@@ -39,7 +39,7 @@ class Bot {
   bindEvents() {
     this.controller.on('rtm_close', (bot, err) => {
       if (err) {
-        throw new Error('RTM Close failed unexpectedly!')
+        console.error('RTM Close failed unexpectedly!')
       }
       this.start()
     });
