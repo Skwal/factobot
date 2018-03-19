@@ -66,40 +66,33 @@ class Bot {
     return hours + 'h ' + minutes + 'm'
   }
 
+  /**
+   * @param {String} title
+   * @param {String} value
+   * @param {Boolean} short
+   */
+  getServerStatusField(title, value, short) {
+    return {
+      title: title,
+      value: value,
+      short: short
+    }
+  }
+
   getServerStatusMessage(server) {
     const time_elapsed = this.getTimeString(server.game_time_elapsed)
-    const players = server.players
+    const players = server.players && server.players.length ? server.players.join(', ') : 'None'
 
     return [
       {
         title: 'Game Details',
         color: '#7CD197',
         fields: [
-          {
-            title: "Name",
-            value: server.name,
-            short: true
-          },
-          {
-            title: "Version",
-            value: server.application_version.game_version,
-            short: true
-          },
-          {
-            title: "Time Elapsed",
-            value: time_elapsed,
-            short: true
-          },
-          {
-            title: "Description",
-            value: server.description,
-            short: false
-          },
-          {
-            title: "Players Online",
-            value: players && players.length ? players.join(', ') : 'None',
-            short: false
-          }
+          this.getServerStatusField("Name", server.name, true),
+          this.getServerStatusField("Version", server.application_version.game_version, true),
+          this.getServerStatusField("Time Elapsed", time_elapsed, true),
+          this.getServerStatusField("Description", server.description, false),
+          this.getServerStatusField("Players Online", players, false)
         ],
       }
     ]
